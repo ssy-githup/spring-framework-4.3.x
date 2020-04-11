@@ -16,8 +16,6 @@ public class App {
         ClassPathXmlApplicationContext ctx =
                 new ClassPathXmlApplicationContext("beans.xml");
 
-        ctx.getId();
-
         System.out.println(ctx.getId());
         TestBean tb = ctx.getBean(TestBean.class);
         tb.test();
