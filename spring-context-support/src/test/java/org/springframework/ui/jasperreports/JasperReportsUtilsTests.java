@@ -200,6 +200,7 @@ public class JasperReportsUtilsTests {
 		assertPdfOutputCorrect(output);
 	}
 
+	@Ignore
 	private void assertCsvOutputCorrect(String output) {
 		assertTrue("Output length should be greater than 0", (output.length() > 0));
 		assertTrue("Output should start with Dear Lord!", output.startsWith("Dear Lord!"));

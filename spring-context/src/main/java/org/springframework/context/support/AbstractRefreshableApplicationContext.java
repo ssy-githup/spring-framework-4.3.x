@@ -118,6 +118,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 */
 	@Override
 	protected final void refreshBeanFactory() throws BeansException {
+		//hasBeanFactory同步块判断是否为空
+		//不为空则销毁bean从新初始化
 		if (hasBeanFactory()) {
 			destroyBeans();
 			closeBeanFactory();
