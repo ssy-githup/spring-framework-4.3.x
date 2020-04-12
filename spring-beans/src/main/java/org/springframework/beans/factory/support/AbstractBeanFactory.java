@@ -236,13 +236,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			final String name, final Class<T> requiredType, final Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
+		// 将别名解析为规范Bean名称，如果是FactoryBean还需删除前缀
 		final String beanName = transformedBeanName(name);
 		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
+		// 检查缓存是否有对象
+		// 循环依赖解决的关键入口
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isDebugEnabled()) {
+				// 该Bean是否正在创建中
 				if (isSingletonCurrentlyInCreation(beanName)) {
 					logger.debug("Returning eagerly cached instance of singleton bean '" + beanName +
 							"' that is not fully initialized yet - a consequence of a circular reference");
@@ -257,11 +261,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		else {
 			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
+			// 如果已经创建了Bean实例则抛出异常，因为可能在循环引用中
 			if (isPrototypeCurrentlyInCreation(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
 
 			// Check if bean definition exists in this factory.
+			// 检查工厂中是否存在Bean定义
 			BeanFactory parentBeanFactory = getParentBeanFactory();
 			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// Not found -> check parent.
@@ -281,14 +287,19 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			try {
+				// 合并BeanDefinition。合并主要是因为BeanDefinition可能存在parent BeanDefinition
+				// 所以要依据合并后的BeanDefinition来实例化和初始化
 				final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 				checkMergedBeanDefinition(mbd, beanName, args);
 
 				// Guarantee initialization of beans that the current bean depends on.
+				// 获取依赖信息
 				String[] dependsOn = mbd.getDependsOn();
 				if (dependsOn != null) {
+					// 确保当前Bean依赖的Bean初始化
 					for (String dep : dependsOn) {
 						if (isDependent(beanName, dep)) {
+							logger.info("==============在bean之间产生了循环依赖================");
 							throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 									"Circular depends-on relationship between '" + beanName + "' and '" + dep + "'");
 						}
@@ -304,17 +315,23 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 
 				// Create bean instance.
+				// 创建Bean实例
+				// 如果是单例对象
 				if (mbd.isSingleton()) {
+					// 使用匿名对象工厂来创建Bean
 					sharedInstance = getSingleton(beanName, new ObjectFactory<Object>() {
 						@Override
 						public Object getObject() throws BeansException {
 							try {
+								// 创建Bean
 								return createBean(beanName, mbd, args);
 							}
 							catch (BeansException ex) {
 								// Explicitly remove instance from singleton cache: It might have been put there
 								// eagerly by the creation process, to allow for circular reference resolution.
 								// Also remove any beans that received a temporary reference to the bean.
+								// 从单例缓存中显式删除实例。在创建过程可能将它提前引用缓存中，以方便循环引用解析。
+								// 还要删除所有对该Bean临时引用的Bean
 								destroySingleton(beanName);
 								throw ex;
 							}
@@ -322,11 +339,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					});
 					bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
 				}
-
+				// 如果是Prototype对象
 				else if (mbd.isPrototype()) {
 					// It's a prototype -> create a new instance.
 					Object prototypeInstance = null;
 					try {
+						// 记录到当前创建的原型对象缓存
 						beforePrototypeCreation(beanName);
 						prototypeInstance = createBean(beanName, mbd, args);
 					}
@@ -335,9 +353,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					}
 					bean = getObjectForBeanInstance(prototypeInstance, name, beanName, mbd);
 				}
-
+				// 既不是Singleton也不是Prototype，可能是自定义scope的对象
 				else {
+					// 获取Scope名称
 					String scopeName = mbd.getScope();
+					// 根据名称解析出对应的Scope对象
 					final Scope scope = this.scopes.get(scopeName);
 					if (scope == null) {
 						throw new IllegalStateException("No Scope registered for scope name '" + scopeName + "'");
@@ -346,11 +366,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						Object scopedInstance = scope.get(beanName, new ObjectFactory<Object>() {
 							@Override
 							public Object getObject() throws BeansException {
+								// 记录到当前创建的原型对象缓存
 								beforePrototypeCreation(beanName);
 								try {
+									// 创建Bean
 									return createBean(beanName, mbd, args);
 								}
 								finally {
+									// 创建完毕，从当前创建的原型对象缓存移除
 									afterPrototypeCreation(beanName);
 								}
 							}
@@ -372,8 +395,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 
 		// Check if required type matches the type of the actual bean instance.
+		// 所需的类型与实际Bean实例类型进行匹配转换
 		if (requiredType != null && bean != null && !requiredType.isInstance(bean)) {
 			try {
+				// 转换成需要的类型
 				return getTypeConverter().convertIfNecessary(bean, requiredType);
 			}
 			catch (TypeMismatchException ex) {
