@@ -530,6 +530,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// 调用我们bean的后置处理器
+				//AOP ：后置处理器进行拦截处理
 				registerBeanPostProcessors(beanFactory);
 
 				// 初始化国际化资源处理器.
