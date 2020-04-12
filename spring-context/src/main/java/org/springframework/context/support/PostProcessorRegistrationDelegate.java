@@ -198,11 +198,17 @@ class PostProcessorRegistrationDelegate {
 	public static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
 
+		//去容器中获取所有的BeanPostProcessor 的名称(还是bean定义)
 		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
 		// Register BeanPostProcessorChecker that logs an info message when
 		// a bean is created during BeanPostProcessor instantiation, i.e. when
 		// a bean is not eligible for getting processed by all BeanPostProcessors.
+		/**
+		 * bean的后置处理器的个数 beanFactory.getBeanPostProcessorCount()成品的个数 直接保存在beanPostProcessors集合中的
+		 * postProcessorNames.length  beanFactory工厂中beand定义的个数
+		 * +1 在后面又马上注册了BeanPostProcessorChecker的后置处理器
+		 */
 		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + postProcessorNames.length;
 		beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, beanProcessorTargetCount));
 
