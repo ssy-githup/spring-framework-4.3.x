@@ -42,8 +42,21 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 
 /**
- * Delegate for AbstractApplicationContext's post-processor handling.
- *
+ *调用bean工厂的后置处理器
+ * 1)BeanDefinitionRegistryPostProcessor(先被执行)
+ *   所有的bean定义信息将要被加载到容器中，Bean实例还没有被初始化
+ * 2)BeanFactoryPostProcessor(后执行)
+ *   所有的Bean定义信息已经加载到容器中，但是Bean实例还没有被初始化.
+ * 该方法的的左右就是用于ioc容器加载bean定义前后进行处理
+ * BeanDefinitionRegistryPostProcessor是bean定义解析前调用
+ * 	   1)实现了PriorityOrdered接口的
+ * 	   2)实现了Ordered接口的
+ * 	   3)没有实现任何的优先级接口的
+ * 	   4)因为BeanDefinitionRegistryPostProcessor是BeanFactoryPostProcessor接口的子接口，实现BeanFactoryPostProcessor的方法
+ * BeanFactoryPostProcessor是bean定义解析后调用
+ *     1)实现了PriorityOrdered接口的
+ * 	   2)实现了Ordered接口的
+ * 	   3)没有实现任何的优先级接口的
  * @author Juergen Hoeller
  * @since 4.0
  */
