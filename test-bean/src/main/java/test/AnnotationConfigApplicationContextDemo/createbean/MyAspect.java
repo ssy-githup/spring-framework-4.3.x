@@ -8,11 +8,11 @@ public class MyAspect {
 
 
 
-    public MyLog getTulingLog() {
+    public MyLog getMyLog() {
         return myLog;
     }
 
-    public void setTulingLog(MyLog tulingLog) {
+    public void setMyLog(MyLog tulingLog) {
         this.myLog = tulingLog;
     }
 
