@@ -2,14 +2,13 @@ package test.AnnotationConfigApplicationContextDemo.createbean;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-/**
- * Created by smlz on 2019/6/3.
- */
+
 @Configuration
-//@ComponentScan(basePackages = {"com.tuling.testcreatebeaninst"})
+@ComponentScan(basePackages = {"test.AnnotationConfigApplicationContextDemo"})
 public class MainConfig {
 
     @Bean(autowire = Autowire.NO)
@@ -19,13 +18,13 @@ public class MainConfig {
 
     @Bean
     @Primary
-    public TulingLog tulingLog() {
-        return new TulingLog();
+    public MyLog tulingLog() {
+        return new MyLog();
     }
 
     @Bean
-    public TulingLog tulingLog2() {
-        return new TulingLog();
+    public MyLog tulingLog2() {
+        return new MyLog();
     }
 
 }
